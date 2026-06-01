@@ -1,0 +1,41 @@
+name: las_plantas
+description: "Virtual Plantas - Tu jardín digital flotante en el escritorio."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  window_manager: ^0.3.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  msix: ^3.16.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/plant_frames/plant_0001/
+    - assets/plant_frames/plant_0002/
+    - assets/plant_frames/plant_0003/
+    - assets/plant_frames/plant_0004/
+    - assets/plant_frames/plant_0005/
+    - assets/plant_frames/plant_0006/
+    - assets/plant_frames/plant_0007/
+    - assets/plant_frames/plant_0008/
+    - assets/plant_frames/plant_0009/
+    - assets/plant_frames/plant_0010/
+    - assets/plant_frames/plant_0011/
+    - assets/plant_frames/plant_0012/
+
+# CONFIGURACIÓN DEL INSTALADOR (Pegado al margen izquierdo)
+msix_config:
+  display_name: Virtual Plantas
+  publisher_display_name: Martin
+  title_bar_color: "#FFFFFF"
+  capabilities: ""
