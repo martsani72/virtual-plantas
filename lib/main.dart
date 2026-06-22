@@ -44,8 +44,8 @@ void main(List<String> args) async {
   if (esInstanciaPlanta) {
     double dimensionSincronizada = 360.0 * escala;
     tamanoInicial = Size(dimensionSincronizada, dimensionSincronizada);
-    minimoSize = Size(dimensionSincronizada, dimensionSincronizada);
-    maximoSize = Size(dimensionSincronizada, dimensionSincronizada);
+    minimoSize = const Size(100, 100);
+    maximoSize = const Size(1200, 1200);
   } else {
     tamanoInicial = const Size(280, 600);
     minimoSize = const Size(280, 500);
@@ -146,23 +146,17 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     if (widget.idPlanta != null) {
-      double dimensionSincronizada = 360.0 * widget.escala;
       return MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(scaffoldBackgroundColor: Colors.transparent),
         home: Scaffold(
           backgroundColor: Colors.transparent,
-          body: SizedBox(
-            width: dimensionSincronizada,
-            height: dimensionSincronizada,
-            child: PlantAnimator(
-              carpetaPlanta: widget.idPlanta!,
-              totalFrames: widget.frames,
-              categoryRigidez: widget.rigidez,
-              escala: widget.escala,
-              dimensionFisica: dimensionSincronizada,
-              onCerrar: () => windowManager.close(),
-            ),
+          body: PlantAnimator(
+            carpetaPlanta: widget.idPlanta!,
+            totalFrames: widget.frames,
+            categoryRigidez: widget.rigidez,
+            escala: widget.escala,
+            onCerrar: () => windowManager.close(),
           ),
         ),
       );

@@ -6,7 +6,6 @@ class PlantAnimator extends StatefulWidget {
   final int totalFrames;
   final int categoryRigidez;
   final double escala;
-  final double dimensionFisica;
   final VoidCallback onCerrar; // Renombrado a onCerrar
 
   const PlantAnimator({
@@ -15,7 +14,6 @@ class PlantAnimator extends StatefulWidget {
     required this.totalFrames,
     required this.categoryRigidez,
     required this.escala,
-    required this.dimensionFisica,
     required this.onCerrar,
   }) : super(key: key);
 
@@ -27,10 +25,12 @@ class _PlantAnimatorState extends State<PlantAnimator> with SingleTickerProvider
   late AnimationController _controller;
   int _currentFrame = 0;
   bool _mostrarMenuCerrar = false;
+  late double _escalaActual;
 
   @override
   void initState() {
     super.initState();
+    _escalaActual = widget.escala;
 
     Duration duracionAnimacion;
     switch (widget.categoryRigidez) {
@@ -71,56 +71,107 @@ class _PlantAnimatorState extends State<PlantAnimator> with SingleTickerProvider
         onEnter: (_) => _dispararBamboleo(),
         child: GestureDetector(
           onPanStart: (_) => windowManager.startDragging(), 
-          onLongPress: () {
+          onSecondaryTap: () {
             setState(() {
               _mostrarMenuCerrar = !_mostrarMenuCerrar;
             });
           },
+          onTap: () {
+            if (_mostrarMenuCerrar) {
+              setState(() {
+                _mostrarMenuCerrar = false;
+              });
+            }
+          },
           child: Stack(
             children: [
               Center(
-                child: SizedBox(
-                  width: widget.dimensionFisica,
-                  height: widget.dimensionFisica,
-                  child: Image.asset(
-                    'assets/plant_frames/${widget.carpetaPlanta}/frame_$frameFormateado.png',
-                    fit: BoxFit.contain,
-                    filterQuality: FilterQuality.high,
-                    gaplessPlayback: true,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: Colors.red.withOpacity(0.3),
-                        child: const Center(
-                          child: Icon(Icons.warning_amber_rounded, color: Colors.red, size: 40),
-                        ),
-                      );
-                    },
-                  ),
+                child: Image.asset(
+                  'assets/plant_frames/${widget.carpetaPlanta}/frame_$frameFormateado.png',
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.high,
+                  gaplessPlayback: true,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.red.withOpacity(0.3),
+                      child: const Center(
+                        child: Icon(Icons.warning_amber_rounded, color: Colors.red, size: 40),
+                      ),
+                    );
+                  },
                 ),
               ),
               
-              // Menú flotante transformado en "Quitar Planta"
               if (_mostrarMenuCerrar)
-                Center(
+                Align(
+                  alignment: Alignment.topLeft,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    width: 165,
+                    margin: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF3A2C2C).withOpacity(0.95), // Color un toque más rojizo/oscuro de alerta
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.redAccent.withOpacity(0.5)),
-                      boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 8, spreadRadius: 1)],
+                      color: const Color(0xFF83934D), // colorEsparrago
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, spreadRadius: 1)],
                     ),
-                    child: Row(
+                    child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.delete_forever_rounded, color: Colors.redAccent, size: 18),
-                          constraints: const BoxConstraints(),
-                          padding: EdgeInsets.zero,
-                          onPressed: widget.onCerrar, // Ejecuta el windowManager.close() de esa ventana
+                        Row(
+                          children: [
+                            const Text("Tamaño", style: TextStyle(color: Color(0xFFF4F6F0), fontSize: 11, fontWeight: FontWeight.bold)),
+                            const Spacer(),
+                            Text("${(_escalaActual * 100).round()}%", style: const TextStyle(fontSize: 9, color: Color(0xFF44562F), fontWeight: FontWeight.bold)),
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _mostrarMenuCerrar = false;
+                                });
+                              },
+                              child: const Icon(Icons.cancel, color: Color(0xFF44562F), size: 14),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        const Text("Quitar Planta", style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 2),
+                        SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            trackHeight: 1.5,
+                            activeTrackColor: const Color(0xFF44562F), // colorBosque
+                            inactiveTrackColor: const Color(0xFFB8C88D), // colorClaroPino
+                            thumbColor: const Color(0xFF44562F),
+                            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
+                            overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
+                          ),
+                          child: Slider(
+                            value: _escalaActual,
+                            min: 0.5,
+                            max: 1.6,
+                            onChanged: (newValue) async {
+                              setState(() {
+                                _escalaActual = newValue;
+                              });
+                              double nuevaDimension = 360.0 * _escalaActual;
+                              await windowManager.setSize(Size(nuevaDimension, nuevaDimension));
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 24,
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.close, color: Color(0xFFF4F6F0), size: 14),
+                            label: const Text("Quitar Planta", style: TextStyle(color: Color(0xFFF4F6F0), fontSize: 11, fontWeight: FontWeight.bold)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF44562F), // colorBosque
+                              elevation: 0,
+                              padding: EdgeInsets.zero,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                            ),
+                            onPressed: widget.onCerrar,
+                          ),
+                        ),
                       ],
                     ),
                   ),
